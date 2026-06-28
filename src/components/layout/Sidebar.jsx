@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingCart, Package, Boxes, ReceiptText,
-  Users, BarChart3, FileText, ShieldCheck, Radio, Settings as SettingsIcon, X,
+  Users, BarChart3, FileText, ShieldCheck, Radio, Settings as SettingsIcon, X, TrendingDown,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth';
 
@@ -13,6 +13,7 @@ const NAV = [
   { to: '/invoices', label: 'Invoices', icon: ReceiptText },
   { to: '/customers', label: 'Customers', icon: Users },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { to: '/below-cost', label: 'Below Cost Sales', icon: TrendingDown, roles: ['admin', 'manager'] },
   { to: '/reports', label: 'Reports', icon: FileText, roles: ['admin', 'manager'] },
   { to: '/live', label: 'Live Owner Panel', icon: Radio, roles: ['admin', 'manager'] },
   { to: '/audit', label: 'Audit Logs', icon: ShieldCheck, roles: ['admin', 'manager'] },

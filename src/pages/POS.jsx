@@ -99,8 +99,8 @@ export default function POS() {
       return;
     }
     for (const it of cart.items) {
-      if (it.selling_price < it.purchase_price) {
-        toast.error(`${it.product_name}: selling price below purchase price`);
+      if (!it.below_cost && it.selling_price < it.purchase_price) {
+        toast.error(`${it.product_name}: rate cost se kam hai — rate pe tap karke "Loss sale" on karo`);
         return;
       }
       if (!it.selling_price || it.selling_price <= 0) {
@@ -123,12 +123,13 @@ export default function POS() {
           quantity: i.quantity,
           purchase_price: i.purchase_price,
           selling_price: i.selling_price,
+          is_below_cost: !!i.below_cost,
         })),
         customer: { name: cart.customerName.trim() || null, phone: cart.customerPhone.trim() || null },
         payment_mode: cart.paymentMode,
         payment_split: cart.paymentMode === 'mixed' ? cart.paymentSplit : {},
-        discount: cart.discount,
-        tax_pct: cart.taxPct,
+        discount: 0,
+        tax_pct: 0,
       };
       const res = await api.post('/invoices', payload);
       setLastInvoice(res.data);
@@ -248,24 +249,6 @@ export default function POS() {
 
           <div className="space-y-2 text-sm">
             <Row label="Subtotal" value={inr2(cart.subtotal())} />
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">Discount</span>
-              <input
-                type="number" min="0"
-                className="input w-28 py-1 text-right"
-                value={cart.discount}
-                onChange={(e) => cart.setDiscount(e.target.value)}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">Tax %</span>
-              <input
-                type="number" min="0"
-                className="input w-28 py-1 text-right"
-                value={cart.taxPct}
-                onChange={(e) => cart.setTaxPct(e.target.value)}
-              />
-            </div>
             <div className="my-2 border-t border-slate-200 dark:border-slate-800" />
             <div className="flex items-center justify-between text-lg font-bold">
               <span>Total</span>
@@ -384,9 +367,20 @@ function CartRow({ item }) {
   const belowCost = item.selling_price < item.purchase_price;
   const [priceOpen, setPriceOpen] = useState(false);
   const [temp, setTemp] = useState('');
+  const [lossOk, setLossOk] = useState(false);
+  const tempNum = Number(temp) || 0;
+  const tempBelow = tempNum > 0 && tempNum < item.purchase_price;
 
-  const openPrice = () => { setTemp(item.selling_price > 0 ? String(item.selling_price) : ''); setPriceOpen(true); };
-  const savePrice = () => { cart.updateItem(item.product_id, { selling_price: Number(temp) || 0 }); setPriceOpen(false); };
+  const openPrice = () => {
+    setTemp(item.selling_price > 0 ? String(item.selling_price) : '');
+    setLossOk(!!item.below_cost);
+    setPriceOpen(true);
+  };
+  const savePrice = () => {
+    if (tempBelow && !lossOk) { toast.error('Cost se kam hai — "Loss sale" tick karo'); return; }
+    cart.updateItem(item.product_id, { selling_price: tempNum, below_cost: tempBelow && lossOk });
+    setPriceOpen(false);
+  };
 
   return (
     <div className="flex flex-wrap items-center gap-3 p-3">
@@ -413,16 +407,20 @@ function CartRow({ item }) {
             type="button"
             onClick={openPrice}
             className={`w-full rounded-lg border px-2 py-2 text-right text-sm font-semibold ${
-              item.selling_price > 0
-                ? belowCost
-                  ? 'border-rose-500 text-rose-500'
-                  : 'border-slate-300 dark:border-slate-700'
-                : 'border-brand-500 text-brand-500'
+              item.below_cost
+                ? 'border-amber-500 text-amber-500'
+                : item.selling_price > 0
+                  ? belowCost
+                    ? 'border-rose-500 text-rose-500'
+                    : 'border-slate-300 dark:border-slate-700'
+                  : 'border-brand-500 text-brand-500'
             }`}
           >
             {item.selling_price > 0 ? inr(item.selling_price) : 'Rate daalo'}
           </button>
-          {item.selling_price > 0 && belowCost && <p className="text-[10px] text-rose-500">Below cost!</p>}
+          {item.below_cost
+            ? <p className="text-[10px] text-amber-500">Loss sale</p>
+            : item.selling_price > 0 && belowCost && <p className="text-[10px] text-rose-500">Below cost!</p>}
         </div>
 
         {/* Qty */}
@@ -460,6 +458,12 @@ function CartRow({ item }) {
           onChange={(e) => setTemp(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') savePrice(); }}
         />
+        {tempBelow && (
+          <label className="mt-3 flex items-center gap-2 rounded-lg bg-amber-500/10 p-2 text-sm text-amber-600 dark:text-amber-400">
+            <input type="checkbox" checked={lossOk} onChange={(e) => setLossOk(e.target.checked)} />
+            Cost se kam bech raha hu — <b>Loss sale</b> (₹{(item.purchase_price - tempNum).toFixed(0)} loss)
+          </label>
+        )}
         <button className="btn-primary mt-3 w-full py-3" onClick={savePrice}>OK</button>
       </Modal>
     </div>

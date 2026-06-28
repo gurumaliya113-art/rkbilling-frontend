@@ -58,7 +58,7 @@ export const useCartStore = create((set, get) => ({
 
   subtotal: () => get().items.reduce((s, i) => s + i.selling_price * i.quantity, 0),
   totalProfit: () =>
-    get().items.reduce((s, i) => s + (i.selling_price - i.purchase_price) * i.quantity, 0),
+    get().items.reduce((s, i) => s + (i.below_cost ? 0 : (i.selling_price - i.purchase_price) * i.quantity), 0),
   total: () => {
     const sub = get().subtotal();
     const afterDisc = sub - get().discount;

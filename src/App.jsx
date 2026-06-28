@@ -10,6 +10,7 @@ import Invoices from './pages/Invoices';
 import Customers from './pages/Customers';
 import Analytics from './pages/Analytics';
 import Reports from './pages/Reports';
+import BelowCostSales from './pages/BelowCostSales';
 import AuditLogs from './pages/AuditLogs';
 import LiveOwnerPanel from './pages/LiveOwnerPanel';
 import Settings from './pages/Settings';
@@ -53,6 +54,14 @@ export default function App() {
           element={
             <Protected roles={['admin', 'manager']}>
               <Reports />
+            </Protected>
+          }
+        />
+        <Route
+          path="below-cost"
+          element={
+            <Protected roles={['admin', 'manager']}>
+              <BelowCostSales />
             </Protected>
           }
         />
