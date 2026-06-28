@@ -98,3 +98,26 @@ export function Modal({ open, onClose, title, children, size = 'md' }) {
     </div>
   );
 }
+
+/** Full-screen image preview. Click anywhere to close. */
+export function Lightbox({ url, onClose }) {
+  if (!url) return null;
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4"
+      onClick={onClose}
+    >
+      <motion.img
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        src={url}
+        alt="preview"
+        className="max-h-[90vh] max-w-[90vw] rounded-lg object-contain shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      />
+      <button className="absolute right-4 top-4 rounded-full bg-white/15 p-2 text-white" onClick={onClose}>
+        ✕
+      </button>
+    </div>
+  );
+}

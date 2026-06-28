@@ -5,7 +5,7 @@ import { Search, Printer, Eye, Ban, ReceiptText } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useInvoices } from '@/hooks/useApi';
 import { useAuthStore } from '@/store/auth';
-import { Card, Badge, Modal, TableSkeleton, EmptyState } from '@/components/ui';
+import { Card, Badge, Modal, Lightbox, TableSkeleton, EmptyState } from '@/components/ui';
 import { inr, dateTime } from '@/lib/format';
 import { printInvoice } from '@/lib/print';
 
@@ -16,6 +16,7 @@ export default function Invoices() {
   const { canManage } = useAuthStore();
   const [params, setParams] = useState({ page: 1, limit: 20, search: '', status: '', payment_mode: '' });
   const [view, setView] = useState(null);
+  const [imgPreview, setImgPreview] = useState(null);
   const { data, isLoading } = useInvoices(params);
   const rows = data?.data || [];
   const meta = data?.meta;
@@ -127,7 +128,14 @@ export default function Invoices() {
             <div className="divide-y divide-slate-100 dark:divide-slate-800">
               {(view.items || []).map((it) => (
                 <div key={it.id} className="flex items-center gap-3 py-2">
-                  {it.product_image && <img src={it.product_image} className="h-10 w-10 rounded object-cover" alt="" />}
+                  {it.product_image && (
+                    <img
+                      src={it.product_image}
+                      className="h-12 w-12 cursor-zoom-in rounded object-cover transition hover:ring-2 hover:ring-brand-500"
+                      alt=""
+                      onClick={() => setImgPreview(it.product_image)}
+                    />
+                  )}
                   <div className="flex-1">
                     <p className="text-sm font-medium">{it.product_name}</p>
                     <p className="text-xs text-slate-400">{it.quantity} × {inr(it.selling_price)}</p>
@@ -147,6 +155,8 @@ export default function Invoices() {
           </div>
         )}
       </Modal>
+
+      <Lightbox url={imgPreview} onClose={() => setImgPreview(null)} />
     </div>
   );
 }
