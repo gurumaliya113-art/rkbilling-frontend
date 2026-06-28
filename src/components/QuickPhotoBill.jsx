@@ -21,6 +21,8 @@ export default function QuickPhotoBill() {
   const [category, setCategory] = useState('');
   const [name, setName] = useState('');
   const [rate, setRate] = useState('');
+  const [cost, setCost] = useState('');
+  const [lossOk, setLossOk] = useState(false);
   const [qty, setQty] = useState(1);
   const [paymentMode, setPaymentMode] = useState('cash');
   const [custName, setCustName] = useState('');
@@ -46,7 +48,7 @@ export default function QuickPhotoBill() {
   };
 
   const reset = () => {
-    setImage(null); setCategory(''); setName(''); setRate(''); setQty(1); setPaymentMode('cash');
+    setImage(null); setCategory(''); setName(''); setRate(''); setCost(''); setLossOk(false); setQty(1); setPaymentMode('cash');
     setCustName(''); setCustPhone('');
     if (fileRef.current) fileRef.current.value = '';
   };
@@ -54,6 +56,9 @@ export default function QuickPhotoBill() {
   const save = async () => {
     if (!rate || Number(rate) <= 0) { toast.error('Rate daalo'); return; }
     if (!custName.trim() && !custPhone.trim()) { toast.error('Customer ka naam ya phone daalo'); return; }
+    const costNum = Number(cost) || 0;
+    const below = costNum > 0 && Number(rate) < costNum;
+    if (below && !lossOk) { toast.error('Rate cost se kam hai — "Loss sale" tick karo'); return; }
     setSaving(true);
     try {
       const label = name.trim() || category || 'Quick Item';
@@ -64,9 +69,10 @@ export default function QuickPhotoBill() {
           product_name: label,
           product_image: image?.url || null,
           category: category || null,
-          purchase_price: 0,
+          purchase_price: costNum,
           selling_price: Number(rate),
           quantity: Number(qty) || 1,
+          is_below_cost: below && lossOk,
         }],
         customer: { name: custName.trim() || null, phone: custPhone.trim() || null },
         payment_mode: paymentMode,
@@ -87,6 +93,8 @@ export default function QuickPhotoBill() {
   };
 
   const total = (Number(rate) || 0) * (Number(qty) || 1);
+  const costNum = Number(cost) || 0;
+  const below = costNum > 0 && Number(rate) > 0 && Number(rate) < costNum;
 
   return (
     <div className="mx-auto max-w-xl">
@@ -143,17 +151,29 @@ export default function QuickPhotoBill() {
           </div>
         </div>
 
-        {/* Rate + qty */}
+        {/* Rate + cost + qty */}
         <div className="mt-3 grid grid-cols-2 gap-3">
           <div>
-            <label className="label">Rate (₹) *</label>
-            <input type="number" min="1" className="input" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="0" />
+            <label className="label">Rate / Selling (₹) *</label>
+            <input type="number" min="1" inputMode="decimal" className="input" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="0" />
+          </div>
+          <div>
+            <label className="label">Cost Price (optional)</label>
+            <input type="number" min="0" inputMode="decimal" className="input" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="0" />
           </div>
           <div>
             <label className="label">Quantity</label>
             <input type="number" min="1" className="input" value={qty} onChange={(e) => setQty(e.target.value)} />
           </div>
         </div>
+
+        {/* Loss sale toggle — appears when rate is below the cost price */}
+        {below && (
+          <label className="mt-3 flex items-center gap-2 rounded-lg bg-amber-500/10 p-2 text-sm text-amber-600 dark:text-amber-400">
+            <input type="checkbox" checked={lossOk} onChange={(e) => setLossOk(e.target.checked)} />
+            Cost se kam bech raha hu — <b>Loss sale</b> (₹{(costNum - Number(rate)).toFixed(0)} loss)
+          </label>
+        )}
 
         {/* Customer */}
         <div className="mt-3 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
