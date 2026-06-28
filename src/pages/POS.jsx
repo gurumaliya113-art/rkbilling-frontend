@@ -418,7 +418,7 @@ function CustomerPicker() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const [results, setResults] = useState([]);
-  const [form, setForm] = useState({ name: '', phone: '' });
+  const [form, setForm] = useState({ name: '', phone: '', email: '' });
 
   const doSearch = async (val) => {
     setQ(val);
@@ -465,6 +465,7 @@ function CustomerPicker() {
         <div className="grid grid-cols-2 gap-2">
           <input className="input" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           <input className="input" placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          <input className="input col-span-2" placeholder="Email (optional)" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
         </div>
         <button className="btn-primary mt-3 w-full" onClick={createNew}>Save &amp; Select</button>
       </Modal>
