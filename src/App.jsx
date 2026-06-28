@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import POS from './pages/POS';
 import Products from './pages/Products';
+import SearchProducts from './pages/SearchProducts';
 import Inventory from './pages/Inventory';
 import Invoices from './pages/Invoices';
 import Customers from './pages/Customers';
@@ -37,6 +38,7 @@ export default function App() {
       >
         <Route index element={<Dashboard />} />
         <Route path="pos" element={<POS />} />
+        <Route path="search" element={<SearchProducts />} />
         <Route path="products" element={<Products />} />
         <Route
           path="inventory"

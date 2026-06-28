@@ -1,13 +1,14 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingCart, Package, Boxes, ReceiptText,
-  Users, BarChart3, FileText, ShieldCheck, Radio, Settings as SettingsIcon, X, TrendingDown,
+  Users, BarChart3, FileText, ShieldCheck, Radio, Settings as SettingsIcon, X, TrendingDown, Search as SearchIcon,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth';
 
 const NAV = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/pos', label: 'Billing / POS', icon: ShoppingCart },
+  { to: '/search', label: 'Search', icon: SearchIcon },
   { to: '/products', label: 'Products', icon: Package },
   { to: '/inventory', label: 'Inventory', icon: Boxes, roles: ['admin', 'manager'] },
   { to: '/invoices', label: 'Invoices', icon: ReceiptText },
@@ -22,8 +23,8 @@ const NAV = [
 
 export default function Sidebar({ collapsed, mobileOpen, onCloseMobile }) {
   const { user } = useAuthStore();
-  // Partner: Billing/POS first, then Dashboard, Invoices, Customers
-  const PARTNER_ORDER = ['/pos', '/', '/invoices', '/customers'];
+  // Partner: Billing/POS first, then Search, Dashboard, Invoices, Customers
+  const PARTNER_ORDER = ['/pos', '/search', '/', '/invoices', '/customers'];
   const items =
     user?.role === 'partner'
       ? PARTNER_ORDER.map((to) => NAV.find((n) => n.to === to)).filter(Boolean)
