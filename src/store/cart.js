@@ -4,6 +4,8 @@ import { create } from 'zustand';
 export const useCartStore = create((set, get) => ({
   items: [],
   customer: null,
+  customerName: '',
+  customerPhone: '',
   paymentMode: 'cash',
   paymentSplit: { cash: 0, upi: 0, card: 0 },
   discount: 0,
@@ -47,6 +49,8 @@ export const useCartStore = create((set, get) => ({
   removeItem: (productId) => set({ items: get().items.filter((i) => i.product_id !== productId) }),
 
   setCustomer: (customer) => set({ customer }),
+  setCustomerName: (customerName) => set({ customerName }),
+  setCustomerPhone: (customerPhone) => set({ customerPhone }),
   setPaymentMode: (paymentMode) => set({ paymentMode }),
   setPaymentSplit: (paymentSplit) => set({ paymentSplit }),
   setDiscount: (discount) => set({ discount: Number(discount) || 0 }),
@@ -65,6 +69,8 @@ export const useCartStore = create((set, get) => ({
     set({
       items: [],
       customer: null,
+      customerName: '',
+      customerPhone: '',
       paymentMode: 'cash',
       paymentSplit: { cash: 0, upi: 0, card: 0 },
       discount: 0,

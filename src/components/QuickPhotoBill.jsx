@@ -25,7 +25,6 @@ export default function QuickPhotoBill() {
   const [paymentMode, setPaymentMode] = useState('cash');
   const [custName, setCustName] = useState('');
   const [custPhone, setCustPhone] = useState('');
-  const [custEmail, setCustEmail] = useState('');
   const [saving, setSaving] = useState(false);
   const [lastInvoice, setLastInvoice] = useState(null);
 
@@ -48,7 +47,7 @@ export default function QuickPhotoBill() {
 
   const reset = () => {
     setImage(null); setCategory(''); setName(''); setRate(''); setQty(1); setPaymentMode('cash');
-    setCustName(''); setCustPhone(''); setCustEmail('');
+    setCustName(''); setCustPhone('');
     if (fileRef.current) fileRef.current.value = '';
   };
 
@@ -69,7 +68,7 @@ export default function QuickPhotoBill() {
           selling_price: Number(rate),
           quantity: Number(qty) || 1,
         }],
-        customer: { name: custName.trim() || null, phone: custPhone.trim() || null, email: custEmail.trim() || null },
+        customer: { name: custName.trim() || null, phone: custPhone.trim() || null },
         payment_mode: paymentMode,
         discount: 0,
         tax_pct: 0,
@@ -159,10 +158,9 @@ export default function QuickPhotoBill() {
         {/* Customer */}
         <div className="mt-3 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
           <label className="label">Customer (bill inke naam pe banega)</label>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2">
             <input className="input" placeholder="Naam" value={custName} onChange={(e) => setCustName(e.target.value)} />
-            <input className="input" placeholder="Phone" value={custPhone} onChange={(e) => setCustPhone(e.target.value)} />
-            <input className="input" placeholder="Email (optional)" value={custEmail} onChange={(e) => setCustEmail(e.target.value)} />
+            <input className="input" placeholder="Phone" inputMode="tel" value={custPhone} onChange={(e) => setCustPhone(e.target.value)} />
           </div>
         </div>
 

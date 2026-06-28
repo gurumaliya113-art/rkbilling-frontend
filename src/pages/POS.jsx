@@ -94,9 +94,17 @@ export default function POS() {
 
   const checkout = async () => {
     if (cart.items.length === 0) { toast.error('Cart is empty'); return; }
+    if (!cart.customerName.trim() && !cart.customerPhone.trim()) {
+      toast.error('Customer ka naam ya phone daalo');
+      return;
+    }
     for (const it of cart.items) {
       if (it.selling_price < it.purchase_price) {
         toast.error(`${it.product_name}: selling price below purchase price`);
+        return;
+      }
+      if (!it.selling_price || it.selling_price <= 0) {
+        toast.error(`${it.product_name}: rate daalo`);
         return;
       }
     }
@@ -116,7 +124,7 @@ export default function POS() {
           purchase_price: i.purchase_price,
           selling_price: i.selling_price,
         })),
-        customer_id: cart.customer?.id || null,
+        customer: { name: cart.customerName.trim() || null, phone: cart.customerPhone.trim() || null },
         payment_mode: cart.paymentMode,
         payment_split: cart.paymentMode === 'mixed' ? cart.paymentSplit : {},
         discount: cart.discount,
@@ -301,7 +309,24 @@ export default function POS() {
             )}
           </div>
 
-          <CustomerPicker />
+          <div className="mt-4">
+            <label className="label">Customer (bill inke naam pe banega)</label>
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                className="input"
+                placeholder="Naam"
+                value={cart.customerName}
+                onChange={(e) => cart.setCustomerName(e.target.value)}
+              />
+              <input
+                className="input"
+                placeholder="Phone"
+                inputMode="tel"
+                value={cart.customerPhone}
+                onChange={(e) => cart.setCustomerPhone(e.target.value)}
+              />
+            </div>
+          </div>
 
           <button className="btn-primary mt-4 w-full py-3 text-base" onClick={checkout} disabled={submitting}>
             {submitting ? <Spinner /> : `Checkout • ${inr(cart.total())}  (F9)`}
@@ -357,6 +382,12 @@ function Row({ label, value }) {
 function CartRow({ item }) {
   const cart = useCartStore();
   const belowCost = item.selling_price < item.purchase_price;
+  const [priceOpen, setPriceOpen] = useState(false);
+  const [temp, setTemp] = useState('');
+
+  const openPrice = () => { setTemp(item.selling_price > 0 ? String(item.selling_price) : ''); setPriceOpen(true); };
+  const savePrice = () => { cart.updateItem(item.product_id, { selling_price: Number(temp) || 0 }); setPriceOpen(false); };
+
   return (
     <div className="flex flex-wrap items-center gap-3 p-3">
       <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
@@ -376,15 +407,22 @@ function CartRow({ item }) {
 
       {/* Controls — wrap to a full-width row on mobile, inline on larger screens */}
       <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
-        {/* Selling price */}
-        <div className="w-24">
-          <input
-            type="number" min={item.purchase_price}
-            className={`input py-1 text-right text-sm ${belowCost ? 'border-rose-500' : ''}`}
-            value={item.selling_price}
-            onChange={(e) => cart.updateItem(item.product_id, { selling_price: Number(e.target.value) })}
-          />
-          {belowCost && <p className="text-[10px] text-rose-500">Below cost!</p>}
+        {/* Selling price — tap to open keyboard dialog */}
+        <div className="w-28">
+          <button
+            type="button"
+            onClick={openPrice}
+            className={`w-full rounded-lg border px-2 py-2 text-right text-sm font-semibold ${
+              item.selling_price > 0
+                ? belowCost
+                  ? 'border-rose-500 text-rose-500'
+                  : 'border-slate-300 dark:border-slate-700'
+                : 'border-brand-500 text-brand-500'
+            }`}
+          >
+            {item.selling_price > 0 ? inr(item.selling_price) : 'Rate daalo'}
+          </button>
+          {item.selling_price > 0 && belowCost && <p className="text-[10px] text-rose-500">Below cost!</p>}
         </div>
 
         {/* Qty */}
@@ -409,6 +447,21 @@ function CartRow({ item }) {
           <Trash2 size={16} />
         </button>
       </div>
+
+      <Modal open={priceOpen} onClose={() => setPriceOpen(false)} title="Rate daalo" size="sm">
+        <p className="mb-2 text-xs text-slate-400">{item.product_name} • Cost: {inr(item.purchase_price)}</p>
+        <input
+          autoFocus
+          type="number"
+          inputMode="decimal"
+          className="input text-lg"
+          placeholder="0"
+          value={temp}
+          onChange={(e) => setTemp(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') savePrice(); }}
+        />
+        <button className="btn-primary mt-3 w-full py-3" onClick={savePrice}>OK</button>
+      </Modal>
     </div>
   );
 }
