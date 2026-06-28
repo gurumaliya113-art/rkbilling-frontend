@@ -21,7 +21,11 @@ const NAV = [
 
 export default function Sidebar({ collapsed, mobileOpen, onCloseMobile }) {
   const { user } = useAuthStore();
-  const items = NAV.filter((n) => !n.roles || n.roles.includes(user?.role));
+  const PARTNER_ALLOWED = ['/', '/pos', '/invoices', '/customers'];
+  const items =
+    user?.role === 'partner'
+      ? NAV.filter((n) => PARTNER_ALLOWED.includes(n.to))
+      : NAV.filter((n) => !n.roles || n.roles.includes(user?.role));
 
   const content = (
     <div className="flex h-full flex-col">

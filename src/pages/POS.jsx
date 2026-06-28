@@ -8,6 +8,7 @@ import { Card, Spinner, EmptyState, Modal } from '@/components/ui';
 import { inr, inr2 } from '@/lib/format';
 import { printInvoice } from '@/lib/print';
 import CodeScanner from '@/components/CodeScanner';
+import QuickPhotoBill from '@/components/QuickPhotoBill';
 
 export default function POS() {
   const cart = useCartStore();
@@ -17,6 +18,7 @@ export default function POS() {
   const [lastInvoice, setLastInvoice] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
+  const [mode, setMode] = useState('scan'); // 'scan' | 'photo'
 
   useEffect(() => { inputRef.current?.focus(); }, []);
 
@@ -133,7 +135,31 @@ export default function POS() {
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
+    <div className="space-y-4">
+      {/* Billing mode toggle */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setMode('scan')}
+          className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+            mode === 'scan' ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+          }`}
+        >
+          Code / Scan
+        </button>
+        <button
+          onClick={() => setMode('photo')}
+          className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+            mode === 'photo' ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+          }`}
+        >
+          Photo Bill
+        </button>
+      </div>
+
+      {mode === 'photo' && <QuickPhotoBill />}
+
+      {mode === 'scan' && (
+      <div className="grid gap-6 lg:grid-cols-3">
       {/* Left: search + items */}
       <div className="space-y-4 lg:col-span-2">
         <Card className="p-4">
@@ -313,6 +339,8 @@ export default function POS() {
 
       {/* Camera OCR scanner */}
       <CodeScanner open={scanOpen} onClose={() => setScanOpen(false)} onDetected={onScanned} />
+    </div>
+      )}
     </div>
   );
 }

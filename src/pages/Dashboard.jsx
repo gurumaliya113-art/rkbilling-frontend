@@ -7,12 +7,14 @@ import {
 } from 'recharts';
 import { api } from '@/lib/api';
 import { useDashboard } from '@/hooks/useApi';
+import { useAuthStore } from '@/store/auth';
 import { StatCard, Card, TableSkeleton } from '@/components/ui';
 import { inr, num, dateOnly } from '@/lib/format';
 
 const COLORS = ['#2457eb', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
 
 export default function Dashboard() {
+  const isPartner = useAuthStore((s) => s.user?.role) === 'partner';
   const { data, isLoading } = useDashboard();
   const { data: trend } = useQuery({
     queryKey: ['sales-trend', 'month'],
@@ -65,7 +67,9 @@ export default function Dashboard() {
         <StatCard label="This Week" value={inr(d.week.revenue)} sub={`Profit ${inr(d.week.profit)}`} icon={IndianRupee} />
         <StatCard label="This Month" value={inr(d.month.revenue)} sub={`Profit ${inr(d.month.profit)}`} icon={IndianRupee} accent="green" />
         <StatCard label="This Year" value={inr(d.year.revenue)} sub={`${num(d.year.bills)} bills`} icon={IndianRupee} accent="violet" />
-        <StatCard label="Inventory Value" value={inr(d.inventory?.inventory_cost_value)} sub={`${num(d.inventory?.total_units)} units`} icon={Boxes} accent="amber" />
+        {!isPartner && (
+          <StatCard label="Inventory Value" value={inr(d.inventory?.inventory_cost_value)} sub={`${num(d.inventory?.total_units)} units`} icon={Boxes} accent="amber" />
+        )}
       </div>
 
       {/* Payment split */}

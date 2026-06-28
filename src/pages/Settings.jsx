@@ -173,7 +173,7 @@ function UserForm({ onClose, onSaved }) {
         <div>
           <label className="label">Role</label>
           <select className="input" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
-            {['staff', 'manager', 'admin'].map((r) => <option key={r} value={r}>{r}</option>)}
+            {['staff', 'manager', 'admin', 'partner'].map((r) => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
         <div className="flex justify-end gap-2">
