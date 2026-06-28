@@ -21,7 +21,8 @@ export default function Login() {
       const res = await api.post('/auth/login', form);
       setSession(res.data);
       toast.success(`Welcome back, ${res.data.user.full_name}`);
-      navigate('/');
+      // Partner lands directly on Billing/POS; others on the dashboard.
+      navigate(res.data.user?.role === 'partner' ? '/pos' : '/');
     } catch (err) {
       toast.error(err.message || 'Login failed');
     } finally {

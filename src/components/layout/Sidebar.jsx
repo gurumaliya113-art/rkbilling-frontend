@@ -21,10 +21,11 @@ const NAV = [
 
 export default function Sidebar({ collapsed, mobileOpen, onCloseMobile }) {
   const { user } = useAuthStore();
-  const PARTNER_ALLOWED = ['/', '/pos', '/invoices', '/customers'];
+  // Partner: Billing/POS first, then Dashboard, Invoices, Customers
+  const PARTNER_ORDER = ['/pos', '/', '/invoices', '/customers'];
   const items =
     user?.role === 'partner'
-      ? NAV.filter((n) => PARTNER_ALLOWED.includes(n.to))
+      ? PARTNER_ORDER.map((to) => NAV.find((n) => n.to === to)).filter(Boolean)
       : NAV.filter((n) => !n.roles || n.roles.includes(user?.role));
 
   const content = (

@@ -358,7 +358,7 @@ function CartRow({ item }) {
   const cart = useCartStore();
   const belowCost = item.selling_price < item.purchase_price;
   return (
-    <div className="flex items-center gap-3 p-3">
+    <div className="flex flex-wrap items-center gap-3 p-3">
       <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
         {item.product_image ? (
           <img src={item.product_image} alt={item.product_name} className="h-full w-full object-cover" />
@@ -368,44 +368,47 @@ function CartRow({ item }) {
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold">{item.product_name}</p>
-        <p className="text-xs text-slate-400">
+        <p className="truncate text-xs text-slate-400">
           {item.product_code} • {[item.size, item.color].filter(Boolean).join(' / ')}
         </p>
         <p className="text-xs text-slate-400">Cost: {inr(item.purchase_price)}</p>
       </div>
 
-      {/* Selling price */}
-      <div className="w-24">
-        <input
-          type="number" min={item.purchase_price}
-          className={`input py-1 text-right text-sm ${belowCost ? 'border-rose-500' : ''}`}
-          value={item.selling_price}
-          onChange={(e) => cart.updateItem(item.product_id, { selling_price: Number(e.target.value) })}
-        />
-        {belowCost && <p className="text-[10px] text-rose-500">Below cost!</p>}
-      </div>
+      {/* Controls — wrap to a full-width row on mobile, inline on larger screens */}
+      <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
+        {/* Selling price */}
+        <div className="w-24">
+          <input
+            type="number" min={item.purchase_price}
+            className={`input py-1 text-right text-sm ${belowCost ? 'border-rose-500' : ''}`}
+            value={item.selling_price}
+            onChange={(e) => cart.updateItem(item.product_id, { selling_price: Number(e.target.value) })}
+          />
+          {belowCost && <p className="text-[10px] text-rose-500">Below cost!</p>}
+        </div>
 
-      {/* Qty */}
-      <div className="flex items-center gap-1">
-        <button className="btn-ghost p-1" onClick={() => cart.updateItem(item.product_id, { quantity: Math.max(1, item.quantity - 1) })}>
-          <Minus size={14} />
-        </button>
-        <span className="w-6 text-center text-sm font-semibold">{item.quantity}</span>
-        <button
-          className="btn-ghost p-1"
-          onClick={() => {
-            if (item.quantity >= item.max_stock) { toast.error('Reached available stock'); return; }
-            cart.updateItem(item.product_id, { quantity: item.quantity + 1 });
-          }}
-        >
-          <Plus size={14} />
+        {/* Qty */}
+        <div className="flex items-center gap-1">
+          <button className="btn-ghost p-1" onClick={() => cart.updateItem(item.product_id, { quantity: Math.max(1, item.quantity - 1) })}>
+            <Minus size={14} />
+          </button>
+          <span className="w-6 text-center text-sm font-semibold">{item.quantity}</span>
+          <button
+            className="btn-ghost p-1"
+            onClick={() => {
+              if (item.quantity >= item.max_stock) { toast.error('Reached available stock'); return; }
+              cart.updateItem(item.product_id, { quantity: item.quantity + 1 });
+            }}
+          >
+            <Plus size={14} />
+          </button>
+        </div>
+
+        <div className="w-20 text-right text-sm font-bold">{inr(item.selling_price * item.quantity)}</div>
+        <button className="text-rose-500" onClick={() => cart.removeItem(item.product_id)}>
+          <Trash2 size={16} />
         </button>
       </div>
-
-      <div className="w-20 text-right text-sm font-bold">{inr(item.selling_price * item.quantity)}</div>
-      <button className="text-rose-500" onClick={() => cart.removeItem(item.product_id)}>
-        <Trash2 size={16} />
-      </button>
     </div>
   );
 }

@@ -35,8 +35,9 @@ export function printInvoice(invoice, width = '80mm') {
   </style></head><body>
     <h1>${escapeHtml(shop.name || 'RK Garments')}</h1>
     <div class="center muted">
-      ${escapeHtml(shop.address || '')}<br/>
-      ${escapeHtml(shop.phone || '')}
+      ${escapeHtml(shop.address || '')}
+      ${[shop.city, shop.state].filter(Boolean).join(', ') ? '<br/>' + escapeHtml([shop.city, shop.state].filter(Boolean).join(', ')) + (shop.pincode ? ' - ' + escapeHtml(shop.pincode) : '') : (shop.pincode ? '<br/>' + escapeHtml(shop.pincode) : '')}
+      ${shop.phone ? '<br/>Ph: ' + escapeHtml(shop.phone) : ''}
       ${shop.is_gst_enabled && shop.gstin ? '<br/>GSTIN: ' + escapeHtml(shop.gstin) : ''}
     </div>
     <div class="line"></div>
